@@ -582,7 +582,7 @@ void UNetworkManager::OnGetGlobalLeaderboardCallback(const FString& jsonData)
 {
     UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::OnGetGlobalLeaderboardCallback(%s)"), *jsonData);
     
-    std::vector<LeaderboardEntry> leaderboardEntries;
+    TArray<LeaderboardEntry> leaderboardEntries;
     FString leaderboardID;
     
     // Parse the response jsonData
@@ -610,7 +610,7 @@ void UNetworkManager::OnGetGlobalLeaderboardCallback(const FString& jsonData)
             ms = leaderboard[i]->AsObject()->GetIntegerField(TEXT("score"));
             time = (float)ms / 1000.0f;
             
-            leaderboardEntries.emplace_back(nickname, time, rank);
+            leaderboardEntries.Emplace(nickname, time, rank);
         }
         
         // Get the leaderboardID
@@ -1089,7 +1089,7 @@ void UNetworkManager::ParseLeaderboard(Leaderboard** leaderboard, TSharedPtr<FJs
 {
     TArray<TSharedPtr<FJsonValue>> leaderboardArray = leaderboardData->GetArrayField(TEXT("leaderboard"));
     
-    std::vector<LeaderboardEntry> leaderboardEntries;
+    TArray<LeaderboardEntry> leaderboardEntries;
     int rank = 0;
     FString nickname;
     int ms = 0;
@@ -1105,7 +1105,7 @@ void UNetworkManager::ParseLeaderboard(Leaderboard** leaderboard, TSharedPtr<FJs
         ms = leaderboardArray[i]->AsObject()->GetIntegerField(TEXT("score"));
         time = (float)ms / 1000.0f;
         
-        leaderboardEntries.emplace_back(nickname, time, rank);
+        leaderboardEntries.Emplace(nickname, time, rank);
     }
     
     // Get the leaderboardID
