@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2022 bitHeads, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -6,18 +6,17 @@
 #include "Leaderboard.h"
 #include "LeaderboardEntry.h"
 #include "Constants.h"
-#include <vector>
 #include "UObject/NoExportTypes.h"
 #include "LeaderboardsManager.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class SPACESHOOTER_API ULeaderboardsManager : public UObject
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+    
 public:
     ULeaderboardsManager() = default;
     ~ULeaderboardsManager() = default;
@@ -32,6 +31,6 @@ public:
     void SetUserTime(float userTime);
     
 private:
-    std::vector<Leaderboard> m_Leaderboards;
+    TArray<Leaderboard> m_Leaderboards;
     float m_UserTime;
 };
