@@ -8,7 +8,6 @@
 #include "Statistic.h"
 #include "Achievement.h"
 #include "UserData.h"
-#include <vector>
 
 /**
  * 
