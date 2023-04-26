@@ -15,15 +15,6 @@ Achievement::Achievement(const FString& achievementID, const FString& title, con
     
 }
 
-void Achievement::Award(ASpaceShooterGameModeBase* gameMode)
-{
-    if(m_Status == Status::NotAwarded)
-    {
-        m_Status = Status::Awarded;
-        gameMode->GetNetworkManager()->AwardAchievement(this);
-    }
-}
-
 bool Achievement::IsAwarded() const
 {
     return m_Status == Status::Awarded;

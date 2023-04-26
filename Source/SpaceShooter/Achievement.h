@@ -11,9 +11,7 @@ class SPACESHOOTER_API Achievement
 {
 public:
     Achievement(const FString& achievementID, const FString& title, const FString& description, const FString& status);
-        
-    void Award(class ASpaceShooterGameModeBase* gameMode);
-    
+            
     bool IsAwarded() const;
     FString GetStatusString() const;
     FString GetAchievementID() const;
