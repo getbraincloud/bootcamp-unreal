@@ -21,11 +21,6 @@ AScrollingBackground::AScrollingBackground()
     
     m_BackgroundSegment2 = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("BackgroundSegment2"));
     m_BackgroundSegment2->SetSimulatePhysics(false);
-    m_BackgroundSegment2->SetConstraintMode(EDOFMode::SixDOF);
-    m_BackgroundSegment2->BodyInstance.bLockXRotation;
-    m_BackgroundSegment2->BodyInstance.bLockYRotation;
-    m_BackgroundSegment2->BodyInstance.bLockZRotation;
-    m_BackgroundSegment2->BodyInstance.bLockYTranslation;
     m_BackgroundSegment2->SetupAttachment(m_Root);
     m_BackgroundSegment2->SetRelativeLocation(FVector(kScreenWidth, 0.0f, 0.0f));
 }
