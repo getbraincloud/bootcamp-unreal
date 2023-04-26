@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2022 bitHeads, Inc. All Rights Reserved.
 
 
 #include "LeaderboardsManager.h"
@@ -7,21 +7,22 @@ void ULeaderboardsManager::AddLeaderboard(const Leaderboard& leaderboard)
 {
     // Remove all existing leaderboards with the same name
     FString name = leaderboard.GetName();
-    m_Leaderboards.erase(std::remove_if(m_Leaderboards.begin(), m_Leaderboards.end(), [&, name](Leaderboard& leaderboard)-> bool{
+    
+    m_Leaderboards.RemoveAll([&, name](Leaderboard& leaderboard) {
         return leaderboard.GetName() == name;
-    }), m_Leaderboards.end());
+    });
     
     // Add the Leaderboard object to the list
-    m_Leaderboards.push_back(leaderboard);
+    m_Leaderboards.Add(leaderboard);
     
     // Check the leaderboard for the user's time
     if (m_UserTime > 0.0f)
     {
-        for (int i = 0; i < m_Leaderboards.back().GetCount(); i++)
+        for (int i = 0; i < m_Leaderboards.Last().GetCount(); i++)
         {
-            if (m_Leaderboards.back().GetLeaderboardEntryAtIndex(i)->GetTime() == m_UserTime)
+            if (m_Leaderboards.Last().GetLeaderboardEntryAtIndex(i)->GetTime() == m_UserTime)
             {
-                m_Leaderboards.back().GetLeaderboardEntryAtIndex(i)->SetIsUserScore(true);
+                m_Leaderboards.Last().GetLeaderboardEntryAtIndex(i)->SetIsUserScore(true);
                 break;
             }
         }
@@ -30,12 +31,12 @@ void ULeaderboardsManager::AddLeaderboard(const Leaderboard& leaderboard)
 
 int ULeaderboardsManager::GetCount()
 {
-    return m_Leaderboards.size();
+    return m_Leaderboards.Num();
 }
 
 Leaderboard* ULeaderboardsManager::GetLeaderboardByName(const FString& name)
 {
-    for (int i = 0; i < m_Leaderboards.size(); i++)
+    for (int i = 0; i < m_Leaderboards.Num(); i++)
         if (m_Leaderboards[i].GetName() == name)
             return &m_Leaderboards[i];
     
@@ -44,7 +45,7 @@ Leaderboard* ULeaderboardsManager::GetLeaderboardByName(const FString& name)
 
 Leaderboard* ULeaderboardsManager::GetLeaderboardAtIndex(int index)
 {
-    if (index >= 0 && index < m_Leaderboards.size())
+    if (index >= 0 && index < m_Leaderboards.Num())
         return &m_Leaderboards[index];
     return nullptr;
 }

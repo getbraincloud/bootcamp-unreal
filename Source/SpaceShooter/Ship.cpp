@@ -168,6 +168,10 @@ void AShip::NotifyActorBeginOverlap(AActor* otherActor)
             {
                 int asteroidAttackDamage = asteroid->GetAttackDamage();
 
+                Statistic* asteroidDestroyedStat = GetGameMode()->GetStatisticsManager()->GetStatisticByName(kBrainCloudStatAsteroidDestroyed);
+                if (asteroidDestroyedStat != nullptr)
+                asteroidDestroyedStat->ApplyIncrement();
+                
                 asteroid->Explode(true);
 
                 if (ApplyDamage(asteroidAttackDamage))
@@ -181,6 +185,10 @@ void AShip::NotifyActorBeginOverlap(AActor* otherActor)
             {
                 int enemyAttackDamage = enemy->GetAttackDamage();
 
+                Statistic* enemiesKilledStat = GetGameMode()->GetStatisticsManager()->GetStatisticByName(kBrainCloudStatEnemiesKilled);
+                if (enemiesKilledStat != nullptr)
+                enemiesKilledStat->ApplyIncrement();
+                
                 enemy->Explode();
 
                 if (ApplyDamage(enemyAttackDamage))
