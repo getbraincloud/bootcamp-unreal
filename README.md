@@ -4,7 +4,7 @@ This repository contains the initial Unreal project that is used for the brainCl
 
 The brainCloud BootCamp learning series can be found on Youtube at the link below:
 
-[https://www.youtube.com/playlist?list=PLDHkRGdDbBBJ03JeQfGnflPIKMOEgBCoZ](https://www.youtube.com/watch?v=aAVL5ORuiGk&list=PLDHkRGdDbBBIHpEDW1KYFFXZlrKdJLuqS)
+https://www.youtube.com/watch?v=aAVL5ORuiGk&list=PLDHkRGdDbBBIHpEDW1KYFFXZlrKdJLuqS
 
 
 If you haven't signed up or you want to log into the brainCloud portal, you can do that here:
