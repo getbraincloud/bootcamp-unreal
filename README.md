@@ -1,4 +1,4 @@
-# BootCamp-Unreal (UE 4.27)
+# BootCamp-Unreal (Lesson 03 - UE 4.27)
 
 This repository contains the Unreal project for Lesson 03 that is used for the brainCloud BootCamp learning series.
 
