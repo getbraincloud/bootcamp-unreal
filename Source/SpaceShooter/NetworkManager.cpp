@@ -957,14 +957,14 @@ void UNetworkManager::OnGetCustomLeaderboardCallback(const FString& jsonData)
 {
     UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::OnGetCustomLeaderboardCallback(%s)"), *jsonData);
     
-    std::vector<LeaderboardEntry> leaderboardEntries;
+    TArray<LeaderboardEntry> leaderboardEntries;
     FString leaderboardID;
     
     // Parse the response jsonData and get the username
     TSharedRef<TJsonReader<TCHAR>> reader = TJsonReaderFactory<TCHAR>::Create(jsonData);
     TSharedPtr<FJsonObject> jsonPacket = MakeShareable(new FJsonObject());
     const bool bSuccess = FJsonSerializer::Deserialize(reader, jsonPacket);
-        
+    
     if(bSuccess)
     {
         TSharedPtr<FJsonObject> data = jsonPacket->GetObjectField(TEXT("data"));
@@ -985,12 +985,12 @@ void UNetworkManager::OnGetCustomLeaderboardCallback(const FString& jsonData)
             ms = itemData->GetIntegerField(TEXT("score"));
             time = (float)ms / 1000.0f;
             
-            leaderboardEntries.emplace_back(nickname, time, rank);
+            leaderboardEntries.Emplace(nickname, time, rank);
         }
     }
-        
-    Leaderboard leaderboard(kBrainCloudCountryLeaderboardID, leaderboardEntries);
     
+    Leaderboard leaderboard(kBrainCloudCountryLeaderboardID, leaderboardEntries);
+
     if (m_Callback != nullptr)
         m_Callback->OnLeaderboardRequestCompleted(leaderboard);
 }
