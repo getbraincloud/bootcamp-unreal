@@ -11,12 +11,12 @@
 
 
 /**
- * 
+ *
  */
 UCLASS()
 class SPACESHOOTER_API UNetworkManager : public UObject
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
     
 public:
     UNetworkManager();
@@ -106,6 +106,7 @@ private:
     UFUNCTION(Category = "CallBack") void OnGetIdentitiesError(int statusCode, int reasonCode, const FString& jsonError);
     
     FString ExtractErrorStatusMessage(const FString& jsonError);
+    FString ExtractUpgradeAppIdMessage(const FString& jsonError);
     
     UPROPERTY() UBrainCloudWrapper* m_BrainCloud;
     NetworkCallback* m_Callback;
