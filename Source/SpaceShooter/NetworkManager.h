@@ -114,7 +114,8 @@ private:
     UFUNCTION(Category = "CallBack") void OnPostScoreToAllLeaderboardsError(int statusCode, int reasonCode, const FString& jsonError);
     
     FString ExtractErrorStatusMessage(const FString& jsonError);
-    
+    FString ExtractUpgradeAppIdMessage(const FString& jsonError);
+
     void OnTwitchAuthorizationGranted(const FString& accessToken, const FString& email, const FString& username) override;
     void OnTwitchAuthorizationDenied() override;
     void OnTwitchAuthorizationError(const FString& errorMessage) override;
