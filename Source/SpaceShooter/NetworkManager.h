@@ -106,6 +106,7 @@ private:
     UFUNCTION(Category = "CallBack") void OnGetIdentitiesError(int statusCode, int reasonCode, const FString& jsonError);
     
     FString ExtractErrorStatusMessage(const FString& jsonError);
+    FString ExtractUpgradeAppIdMessage(const FString& jsonError);
     
     UPROPERTY() UBrainCloudWrapper* m_BrainCloud;
     NetworkCallback* m_Callback;
