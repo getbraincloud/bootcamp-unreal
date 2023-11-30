@@ -4,6 +4,7 @@
 #include "NetworkManager.h"
 #include "Constants.h"
 #include "BrainCloudACL.h"
+#include "ReasonCodes.h"
 #include <algorithm>
 #include "GenericPlatform/GenericPlatformHttp.h"
 #include "HAL/PlatformProcess.h"
@@ -533,13 +534,23 @@ void UNetworkManager::OnAuthenticationError(int statusCode, int reasonCode, cons
 {
     UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::OnAuthenticationError(%s)"), *jsonError);
     
-    //Perhaps this was a failed reconnect authentication, reset the stored profileID
-    m_BrainCloud->resetStoredProfileId();
-    
-    FString errorMessage = "Authentication failed. "  + ExtractErrorStatusMessage(jsonError);
-    
-    if(m_Callback != nullptr)
-        m_Callback->OnAuthenticationRequestFailed(errorMessage);
+    if(reasonCode == ReasonCodes::GAME_VERSION_NOT_SUPPORTED)
+    {
+        FString errorMessage = ExtractUpgradeAppIdMessage(jsonError);
+        
+        if(m_Callback != nullptr)
+            m_Callback->OnAuthenticationRequestFailed(errorMessage);
+    }
+    else
+    {
+        //Perhaps this was a failed reconnect authentication, reset the stored profileID
+        m_BrainCloud->resetStoredProfileId();
+        
+        FString errorMessage = "Authentication failed. "  + ExtractErrorStatusMessage(jsonError);
+        
+        if(m_Callback != nullptr)
+            m_Callback->OnAuthenticationRequestFailed(errorMessage);
+    }
 }
 
 void UNetworkManager::OnLogOutCallback(const FString& jsonData)
@@ -582,7 +593,7 @@ void UNetworkManager::OnGetGlobalLeaderboardCallback(const FString& jsonData)
 {
     UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::OnGetGlobalLeaderboardCallback(%s)"), *jsonData);
     
-    std::vector<LeaderboardEntry> leaderboardEntries;
+    TArray<LeaderboardEntry> leaderboardEntries;
     FString leaderboardID;
     
     // Parse the response jsonData
@@ -610,7 +621,7 @@ void UNetworkManager::OnGetGlobalLeaderboardCallback(const FString& jsonData)
             ms = leaderboard[i]->AsObject()->GetIntegerField(TEXT("score"));
             time = (float)ms / 1000.0f;
             
-            leaderboardEntries.emplace_back(nickname, time, rank);
+            leaderboardEntries.Emplace(nickname, time, rank);
         }
         
         // Get the leaderboardID
@@ -993,6 +1004,21 @@ FString UNetworkManager::ExtractErrorStatusMessage(const FString& jsonError)
     return statusMessage;
 }
 
+FString UNetworkManager::ExtractUpgradeAppIdMessage(const FString& jsonError)
+{
+    TSharedRef<TJsonReader<TCHAR>> reader = TJsonReaderFactory<TCHAR>::Create(jsonError);
+    TSharedPtr<FJsonObject> jsonPacket = MakeShareable(new FJsonObject());
+    const bool bSuccess = FJsonSerializer::Deserialize(reader, jsonPacket);
+    
+    FString upgradeAppIdMessage;
+    
+    if(bSuccess)
+        upgradeAppIdMessage = jsonPacket->GetStringField(TEXT("upgradeAppId"));
+    
+    return upgradeAppIdMessage;
+}
+
+
 void UNetworkManager::OnTwitchAuthorizationGranted(const FString& accessToken, const FString& email, const FString& username)
 {
     UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::OnTwitchAuthorizationGranted(%s, %s, %s)"), *accessToken, *email, *username);
@@ -1089,7 +1115,7 @@ void UNetworkManager::ParseLeaderboard(Leaderboard** leaderboard, TSharedPtr<FJs
 {
     TArray<TSharedPtr<FJsonValue>> leaderboardArray = leaderboardData->GetArrayField(TEXT("leaderboard"));
     
-    std::vector<LeaderboardEntry> leaderboardEntries;
+    TArray<LeaderboardEntry> leaderboardEntries;
     int rank = 0;
     FString nickname;
     int ms = 0;
@@ -1105,7 +1131,7 @@ void UNetworkManager::ParseLeaderboard(Leaderboard** leaderboard, TSharedPtr<FJs
         ms = leaderboardArray[i]->AsObject()->GetIntegerField(TEXT("score"));
         time = (float)ms / 1000.0f;
         
-        leaderboardEntries.emplace_back(nickname, time, rank);
+        leaderboardEntries.Emplace(nickname, time, rank);
     }
     
     // Get the leaderboardID

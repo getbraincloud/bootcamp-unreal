@@ -13,11 +13,10 @@
 struct SPACESHOOTER_API AuthenticationData
 {
     AuthenticationData() : mainLeaderboard(nullptr), dailyLeaderboard(nullptr), countryLeaderboard(nullptr), userData(nullptr) {}
-    ~AuthenticationData() {
-                            if(mainLeaderboard) {delete mainLeaderboard; mainLeaderboard = nullptr;}
-                            if(dailyLeaderboard) {delete dailyLeaderboard; dailyLeaderboard = nullptr;}
-                            if(countryLeaderboard) {delete countryLeaderboard; countryLeaderboard = nullptr;}
-                            if(userData) {delete userData; userData = nullptr;}
+    ~AuthenticationData() { if(mainLeaderboard){delete mainLeaderboard; mainLeaderboard = nullptr;}
+                            if(dailyLeaderboard){delete dailyLeaderboard; dailyLeaderboard = nullptr;}
+                            if(countryLeaderboard){delete countryLeaderboard; countryLeaderboard = nullptr;}
+                            if(userData){delete userData; userData = nullptr;}
                           }
     
     Leaderboard* mainLeaderboard;

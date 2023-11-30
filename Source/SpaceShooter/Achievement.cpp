@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2022 bitHeads, Inc. All Rights Reserved.
 
 
 #include "Achievement.h"

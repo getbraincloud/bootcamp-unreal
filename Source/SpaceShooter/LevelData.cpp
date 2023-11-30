@@ -9,6 +9,7 @@ LevelData::LevelData() :
     m_EntityType("Default"),
     m_EntityID("-1"),
     m_Description("Survive as long as possible"),
+    m_Index(-1),
     m_Duration(-1.0f),
     m_AsteroidMinSpawnCount(kAsteroidMinSpawnCount),
     m_AsteroidMaxSpawnCount(kAsteroidMaxSpawnCount),
