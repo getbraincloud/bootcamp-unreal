@@ -1,4 +1,4 @@
-# BootCamp-Unreal
+# bootcamp-unreal
 
 This repository contains all the source code from the lessons in brainCloud BootCamp learning series. Each lesson that contains source code has a corresponding branch. More details are in the Notes section below.
 
