@@ -2,7 +2,7 @@
 
 This repository contains all the source code from the lessons in brainCloud BootCamp learning series. Each lesson that contains source code has a corresponding branch. More details are in the Notes section below.
 
-The brainCloud BootCamp learning series for Unreal can be found on Youtube at the link below:
+The Unreal BootCamp learning series can be found on Youtube at the link below:
 
 https://www.youtube.com/watch?v=aAVL5ORuiGk&list=PLDHkRGdDbBBIHpEDW1KYFFXZlrKdJLuqS
 
