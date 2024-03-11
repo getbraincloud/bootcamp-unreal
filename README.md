@@ -1,6 +1,6 @@
 # bootcamp-unreal (Lesson 14 - UE 5.1)
 
-This repository contains the Unreal project for Lesson 14 that is used for the Unreal BootCamp (UE 4.27).
+This repository contains the Unreal project for Lesson 14 that is used for the Unreal BootCamp (UE 5.1).
 
 The Unreal BootCamp can be found at the link below:
 
