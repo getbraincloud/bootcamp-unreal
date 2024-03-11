@@ -1,6 +1,6 @@
 # bootcamp-unreal (Lesson 20 - UE 4.27)
 
-This repository contains the Unreal project for Lesson 20 that is used for the Unreal BootCamp (4.27).
+This repository contains the Unreal project for Lesson 20 that is used for the Unreal BootCamp (UE 4.27).
 
 The Unreal BootCamp can be found at the link below:
 
