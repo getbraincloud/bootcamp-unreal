@@ -1,6 +1,6 @@
 # bootcamp-unreal (UE 4.27)
 
-This repository contains the initial Unreal project that is used for the Unreal BootCamp (UE4.27).
+This repository contains the initial Unreal project that is used for the Unreal BootCamp (UE 4.27).
 
 The Unreal BootCamp can be found at the link below:
 
