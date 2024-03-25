@@ -4,6 +4,7 @@
 #include "ConvertUtilities.h"
 #include "RelayWebSocket.h"
 #include "RelayUDPSocket.h"
+#include "RelayTCPSocket.h"
 
 #include "BCClientPluginPrivatePCH.h"
 #include "Serialization/JsonTypes.h"
@@ -27,8 +28,13 @@
 #include "HttpCodes.h"
 
 // #include "BCRelayCommsProxy.h"
-#include "WebSocketBase.h"
+#include "WinWebSocketBase.h"
 #include <iostream>
+#if PLATFORM_WINDOWS
+#include <Winsock2.h>
+#else
+#include <arpa/inet.h> // for ntohs on gnu/clang compiler
+#endif
 #include "Runtime/Launch/Resources/Version.h"
 
 
@@ -119,7 +125,6 @@ BrainCloudRelayComms::BrainCloudRelayComms(BrainCloudClient* in_client)
 BrainCloudRelayComms::~BrainCloudRelayComms()
 {
     socketCleanup();
-    
 	if (m_pRelayConnectCallbackBP != nullptr)
 	{
         m_pRelayConnectCallbackBP->RemoveFromRoot();
@@ -187,6 +192,11 @@ void BrainCloudRelayComms::connect(BCRelayConnectionType in_connectionType, cons
     connect(in_connectionType, host, port, passcode, lobbyId);
 }
 
+/*
+* For real-time networking in WebSocket, make sure to modify or add the ThreadTargetFrameTimeInSeconds to increase the send rate of packets in your DefaultEngine.ini config file
+* It would go under the [WebSockets.LibWebSockets] category, a lower value is a faster send rate, something like 0.001 or 0.0001 would be adequate for real-time
+* Keep in mind that this could impact performance on the socket and CPU, for best results with real-time networking please use UDP protocol.
+*/
 void BrainCloudRelayComms::connect(BCRelayConnectionType in_connectionType, const FString& host, int port, const FString& passcode, const FString& lobbyId)
 {
     m_connectionType = in_connectionType;
@@ -218,7 +228,10 @@ void BrainCloudRelayComms::connect(BCRelayConnectionType in_connectionType, cons
     {
         case BCRelayConnectionType::WEBSOCKET:
         {
-            m_pSocket = new BrainCloud::RelayWebSocket(host, port, false);
+            m_pSocket = new BrainCloud::RelayWebSocket(host, port, false, m_client);
+            m_lastConnectResendTime = FPlatformTime::Seconds();
+            m_isSocketConnected = true;
+            send(CL2RS_CONNECT, buildConnectionRequest());
             break;
         }
         case BCRelayConnectionType::UDP:
@@ -229,6 +242,18 @@ void BrainCloudRelayComms::connect(BCRelayConnectionType in_connectionType, cons
             m_lastConnectResendTime = FPlatformTime::Seconds();
             m_resendConnectRequest = true;
             m_isSocketConnected = true;
+            break;
+        }
+        case BCRelayConnectionType::TCP:
+        {
+            UE_LOG(LogBrainCloudRelayComms, Log, TEXT("Creating TCP Socket Connection to %s:%d"), *host, port);
+            m_pSocket = new BrainCloud::RelayTCPSocket(host, port);
+            m_lastRecvTime = FPlatformTime::Seconds();
+            
+            m_isSocketConnected = true;
+
+            send(CL2RS_CONNECT, buildConnectionRequest());
+            m_lastConnectResendTime = FPlatformTime::Seconds();
             break;
         }
         default:
@@ -242,14 +267,14 @@ void BrainCloudRelayComms::connect(BCRelayConnectionType in_connectionType, cons
 
 void BrainCloudRelayComms::disconnect() 
 {
-    if (!m_isSocketConnected) return;
+    if (!m_isConnected) return;
 
     send(CL2RS_DISCONNECT, "");
 }
 
 void BrainCloudRelayComms::endMatch(FString jsonPayload)
 {
-    if (!m_isSocketConnected) return;
+    if (!m_isConnected) return;
     
     send(CL2RS_RSMG_ENDMATCH, jsonPayload);
 }
@@ -269,11 +294,11 @@ void BrainCloudRelayComms::socketCleanup()
             m_pSocket->close();
         }
         else {
-            UE_LOG(LogBrainCloudRelayComms, Log, TEXT("RelayWebSocket Socket pointer is null"));
+            UE_LOG(LogBrainCloudRelayComms, Log, TEXT("Socket Socket pointer is null"));
         }
         delete m_pSocket;
         m_pSocket = nullptr;
-        UE_LOG(LogBrainCloudRelayComms, Log, TEXT("RelayWebSocket Destroyed"));   
+        UE_LOG(LogBrainCloudRelayComms, Log, TEXT("Socket Destroyed"));   
     }
 
     m_sendPacketId.Reset();
@@ -283,7 +308,6 @@ void BrainCloudRelayComms::socketCleanup()
     m_reliables.Reset();
     m_orderedReliablePackets.Reset();
     m_packetPool.reclaim();
-    
 }
 
 bool BrainCloudRelayComms::isConnected() const
@@ -514,7 +538,7 @@ void BrainCloudRelayComms::send(int netId, const FString& text)
 {
     if (m_client->isLoggingEnabled())
     {
-        UE_LOG(LogBrainCloudRelayComms, Log, TEXT("RELAY SEND: %s"), *text);
+        //UE_LOG(LogBrainCloudRelayComms, Log, TEXT("RELAY SEND: %s"), *text);
     }
 
 
@@ -539,27 +563,9 @@ void BrainCloudRelayComms::send(const uint8* in_data, int in_size)
     }
 }
 
-void BrainCloudRelayComms::onRecv(const uint8* in_data, int in_size)
+void BrainCloudRelayComms::processPacket(const uint8* pData, int size)
 {
-    m_lastRecvTime = FPlatformTime::Seconds();
-
-    if (in_size < 3)
-    {
-        socketCleanup();
-        queueErrorEvent("Relay Recv Error: packet cannot be smaller than 3 bytes");
-        return;
-    }
-
-    int size = (int)ntohs(*(u_short*)in_data);
-    int controlByte = (int)in_data[2];
-    
-    if (size < in_size)
-    {
-        socketCleanup();
-        queueErrorEvent("Relay Recv Error: Packet is smaller than header's size");
-        return;
-    }
-    
+    int controlByte = (int)pData[2];
 
     if (controlByte == RS2CL_RSMG)
     {
@@ -569,7 +575,7 @@ void BrainCloudRelayComms::onRecv(const uint8* in_data, int in_size)
             queueErrorEvent("Relay Recv Error: RSMG cannot be smaller than 5 bytes");
             return;
         }
-        onRSMG(in_data + 3, size - 3);
+        onRSMG(pData + 3, size - 3);
     }
     else if (controlByte == RS2CL_DISCONNECT)
     {
@@ -590,7 +596,7 @@ void BrainCloudRelayComms::onRecv(const uint8* in_data, int in_size)
         }
         if (m_connectionType == BCRelayConnectionType::UDP)
         {
-            onAck(in_data + 3);
+            onAck(pData + 3);
         }
     }
     else if (controlByte == RS2CL_RELAY)
@@ -601,12 +607,40 @@ void BrainCloudRelayComms::onRecv(const uint8* in_data, int in_size)
             queueErrorEvent("Relay Recv Error: relay packet cannot be smaller than 5 bytes");
             return;
         }
-        onRelay(in_data + 3, in_size - 3);
+        onRelay(pData + 3, size - 3);
     }
     else
     {
         socketCleanup();
         queueErrorEvent("Relay Recv Error: Unknown control byte: " + FString::FromInt(controlByte));
+    }
+}
+
+void BrainCloudRelayComms::onRecv(const uint8* in_data, int in_size)
+{
+    m_lastRecvTime = FPlatformTime::Seconds();
+    
+    //Add packet to buffer
+    m_receiveBuffer.Append(in_data, in_size);
+
+    //Process complete frames from the buffer
+    while (m_receiveBuffer.Num() >= 2) // Minimum required size for the frame length
+    {
+        // Read the first 2 bytes to get the size of the frame
+        uint16_t frameLen = ntohs(*reinterpret_cast<const uint16_t*>(m_receiveBuffer.GetData()));
+        // Check if the frame is fully received
+        if (m_receiveBuffer.Num() >= frameLen)
+        {
+            // Process the complete frame (skipping the first 2 bytes used for the frame length)
+            processPacket(m_receiveBuffer.GetData(), frameLen);
+
+            m_receiveBuffer.RemoveAt(0, frameLen);
+        }
+        else
+        {
+            // If the frame is not complete yet, break the loop to wait for more data
+            break;
+        }
     }
 }
 
@@ -752,6 +786,7 @@ void BrainCloudRelayComms::onRSMG(const uint8* in_data, int in_size)
     {
         m_endMatchRequested = true;
         socketCleanup();
+        UE_LOG(LogTemp, Display, TEXT("END_MATCH triggered"));
     }
 
     queueSystemEvent(jsonString);
@@ -968,7 +1003,6 @@ void BrainCloudRelayComms::onRelay(const uint8* in_data, int in_size)
 void BrainCloudRelayComms::RunCallbacks()
 {
     auto now = FPlatformTime::Seconds();
-
     // Update socket
     if (m_pSocket)
     {
@@ -979,6 +1013,7 @@ void BrainCloudRelayComms::RunCallbacks()
             // Peek messages
             int packetSize;
             const uint8_t* pPacketData;
+
             while (m_pSocket && ((pPacketData = m_pSocket->peek(packetSize)) != 0))
             {
                 onRecv(pPacketData, packetSize);
@@ -1042,7 +1077,7 @@ void BrainCloudRelayComms::RunCallbacks()
         else if (!m_pSocket->isValid())
         {
             socketCleanup();
-            queueErrorEvent("Relay Socket Error: failed to connect");
+            queueErrorEvent("Relay Socket Error: failed to connect - invalid socket");
         }
         else
         {
@@ -1055,9 +1090,10 @@ void BrainCloudRelayComms::RunCallbacks()
                 {
                     UE_LOG(LogBrainCloudRelayComms, Log, TEXT("Relay Socket Connected"));
                 }
-                send(CL2RS_CONNECT, buildConnectionRequest());
+                
                 if (m_connectionType == BCRelayConnectionType::UDP)
                 {
+                    send(CL2RS_CONNECT, buildConnectionRequest());
                     m_resendConnectRequest = true;
                     m_lastConnectResendTime = now;
                 }
