@@ -1,6 +1,7 @@
 // Copyright 2018 bitHeads, Inc. All Rights Reserved.
 
 #pragma once
+#include "BCPlatform.generated.h"
 
 UENUM(BlueprintType)
 enum class EBCPlatform : uint8
@@ -25,6 +26,7 @@ enum class EBCPlatform : uint8
     PS_VITA UMETA(DisplayName = "PS Vita"),
     TIZEN UMETA(DisplayName = "Tizen"),
     ROKU UMETA(DisplayName = "Roku"),
+    NINTENDO UMETA(DisplayName = "Nintendo"),
     UNKNOWN UMETA(DisplayName = "Unknown")
 };
 
