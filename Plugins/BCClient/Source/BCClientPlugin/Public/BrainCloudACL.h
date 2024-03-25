@@ -1,6 +1,7 @@
 // Copyright 2018 bitHeads, Inc. All Rights Reserved.
 #pragma once
 
+#include "Dom/JsonObject.h"
 #include "IAcl.h"
 #include "BrainCloudACL.generated.h"
 
@@ -18,6 +19,6 @@ public:
 
   virtual TSharedRef<FJsonObject> toJsonObject();
 
-  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="BrainCloud|ACL")
   EAcl Other;
 };
