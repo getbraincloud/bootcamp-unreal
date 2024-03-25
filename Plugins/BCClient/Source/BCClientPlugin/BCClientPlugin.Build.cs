@@ -44,9 +44,11 @@ public class BCClientPlugin : ModuleRules
                 {
                     "Core",
                     "CoreUObject",
+                    "ApplicationCore",
                     "Engine",
                     "Sockets",
                     "Networking",
+                    "WebSockets",
                     "Json",
                     "HTTP"
                 });
@@ -58,41 +60,17 @@ public class BCClientPlugin : ModuleRules
         if (Target.Platform == UnrealTargetPlatform.Win64 /*|| Target.Platform == UnrealTargetPlatform.Win32*/)
         {
             PrivateDependencyModuleNames.Add("zlib");
-            PublicDependencyModuleNames.Add("libWebSockets");
         }
-        else if (Target.Platform == UnrealTargetPlatform.Mac)
-        {           
-            PublicDependencyModuleNames.Add("libWebSockets");
-        }
-        else if (Target.Platform == UnrealTargetPlatform.Linux)
-        {
-            PublicDependencyModuleNames.Add("libWebSockets");
-        }
-        else if (Target.Platform == UnrealTargetPlatform.IOS)
-        {
-            PublicDependencyModuleNames.Add("libWebSockets");
-        }
-        else if (Target.Platform == UnrealTargetPlatform.Android)
-        {
-            PublicDependencyModuleNames.Add("libWebSockets");
-        }
+
         //Uncomment if you're developing for Playstation 5
         /*else if (Target.Platform == UnrealTargetPlatform.PS5)
         {
             PublicDependencyModuleNames.Add("WebSockets_PS5");
-            PublicDependencyModuleNames.Add("libWebSockets");
         }*/
-    #if UE_4_24_OR_LATER
-        else 
-        {
-            //PublicLibraryPaths.Add(Path.Combine(ModulePath, "ThirdParty/lib/HTML5"));
-            PublicAdditionalLibraries.Add(Path.Combine(ModulePath,"ThirdParty/lib/HTML5/WebSocket.js"));
-        }
-    #endif
 
     #if EARLIER_THAN_4_23 
     #if WITH_FORWARDED_MODULE_RULES_CTOR
-        
+        // support for HTML5 available in engine before UE 4.24
         else if (Target.Platform ==UnrealTargetPlatform.HTML5)
         {
             PublicLibraryPaths.Add(Path.Combine(ModulePath, "ThirdParty/lib/HTML5"));
