@@ -1,6 +1,7 @@
 // Copyright 2018 bitHeads, Inc. All Rights Reserved.
 
 #pragma once
+#include "BrainCloudLeaderboard.generated.h"
 
 UENUM(BlueprintType)
 enum class ESocialLeaderboardType : uint8
@@ -21,11 +22,12 @@ enum class ERotationType : uint8
 	YEARLY UMETA(DisplayName = "Yearly")
 };
 
+// this name collides with enum 'ESortOrder' in Plugins/Experimental/VirtualCamera
 UENUM(BlueprintType)
 enum class ESortOrder : uint8
 {
-	HIGH_TO_LOW UMETA(DisplayName = "High to Low"),
-	LOW_TO_HIGH UMETA(DisplayName = "Low to High")
+    HIGH_TO_LOW UMETA(DisplayName = "High to Low"),
+    LOW_TO_HIGH UMETA(DisplayName = "Low to High")
 };
 
 class BrainCloudClient;
