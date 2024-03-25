@@ -1,6 +1,7 @@
 // Copyright 2018 bitHeads, Inc. All Rights Reserved.
 
 #pragma once
+#include "BCAuthType.generated.h"
 
 UENUM(BlueprintType)
 enum class EBCAuthType : uint8
@@ -24,6 +25,7 @@ enum class EBCAuthType : uint8
 	SettopHandoff UMETA(DisplayName = "SettopHandoff"),
 	External UMETA(DisplayName = "External"),
 	Ultra UMETA(DisplayName = "Ultra"),
+	Nintendo UMETA(DisplayName = "Nintendo"),
 	Unknown UMETA(DisplayName = "Unknown")
 };
 
