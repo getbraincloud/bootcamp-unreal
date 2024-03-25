@@ -35,9 +35,13 @@ void FOnlineAchievementsBrainCloud::WriteAchievements(const FUniqueNetId& Player
         Delegate.ExecuteIfBound(PlayerId, false);
         return;
     }
-
+    // Unreal Engine Version is >= Unreal Engine 5.0
+#if ENGINE_MAJOR_VERSION >= 5
+    const TArray<FOnlineAchievement> * PlayerAch = PlayerAchievements.Find(FUniqueNetIdString::Create(PlayerId.ToString(), PlayerId.GetType()).Get());
+#else
     FUniqueNetIdString BrainCloudId(PlayerId);
     const TArray<FOnlineAchievement> * PlayerAch = PlayerAchievements.Find(BrainCloudId);
+#endif
     if (NULL == PlayerAch)
     {
         // achievements haven't been read for a player
@@ -123,9 +127,13 @@ EOnlineCachedResult::Type FOnlineAchievementsBrainCloud::GetCachedAchievement(co
         // we don't have achievements
         return EOnlineCachedResult::NotFound;
     }
-
+    // Unreal Engine Version is >= Unreal Engine 5.0
+#if ENGINE_MAJOR_VERSION >= 5
+    const TArray<FOnlineAchievement> * PlayerAch = PlayerAchievements.Find(FUniqueNetIdString::Create(PlayerId.ToString(), PlayerId.GetType()).Get());
+#else
     FUniqueNetIdString BrainCloudId(PlayerId);
     const TArray<FOnlineAchievement> * PlayerAch = PlayerAchievements.Find(BrainCloudId);
+#endif
     if (PlayerAch == nullptr)
     {
         // achievements haven't been read for a player
@@ -154,8 +162,13 @@ EOnlineCachedResult::Type FOnlineAchievementsBrainCloud::GetCachedAchievements(c
         return EOnlineCachedResult::NotFound;
     }
 
+    // Unreal Engine Version is >= Unreal Engine 5.0
+#if ENGINE_MAJOR_VERSION >= 5
+    const TArray<FOnlineAchievement> * PlayerAch = PlayerAchievements.Find(FUniqueNetIdString::Create(PlayerId.ToString(), PlayerId.GetType()).Get());
+#else
     FUniqueNetIdString BrainCloudId(PlayerId);
     const TArray<FOnlineAchievement> * PlayerAch = PlayerAchievements.Find(BrainCloudId);
+#endif
     if (PlayerAch == nullptr)
     {
         // achievements haven't been read for a player
@@ -196,7 +209,13 @@ void FOnlineAchievementsBrainCloud::OnWriteAchievementsComplete(bool bWasSuccess
     // if write completed successfully, unlock the achievements (and update their cache)
     if (bWasSuccessful)
     {
+
+        // Unreal Engine Version is >= Unreal Engine 5.0
+#if ENGINE_MAJOR_VERSION >= 5
+        TArray<FOnlineAchievement> * PlayerAch = PlayerAchievements.Find(FUniqueNetIdString::Create(PlayerId.ToString(), PlayerId.GetType()).Get());
+#else
         TArray<FOnlineAchievement> * PlayerAch = PlayerAchievements.Find(FUniqueNetIdString(PlayerId));
+#endif
         check(PlayerAch);   // were we writing for a non-existing player?
         if (PlayerAch != nullptr)
         {
@@ -258,8 +277,12 @@ void FOnlineAchievementsBrainCloud::OnQueryAchievementsComplete(bool bWasSuccess
             }
         }
     }
-
+    // Unreal Engine Version is >= Unreal Engine 5.0
+#if ENGINE_MAJOR_VERSION >= 5
+    FUniqueNetIdString brainCloudId = FUniqueNetIdString::Create(PlayerId->ToString(), PlayerId->GetType()).Get();
+#else
     FUniqueNetIdString brainCloudId(*PlayerId);
+#endif
 
     if (PlayerAchievements.Contains(brainCloudId))
     {
@@ -344,8 +367,14 @@ bool FOnlineAchievementsBrainCloud::ResetAchievements(const FUniqueNetId& Player
         return false;
     }
 
+    // Unreal Engine Version is >= Unreal Engine 5.0
+#if ENGINE_MAJOR_VERSION >= 5
+    TArray<FOnlineAchievement> * PlayerAch = PlayerAchievements.Find(FUniqueNetIdString::Create(PlayerId.ToString(), PlayerId.GetType()).Get());
+#else
     FUniqueNetIdString BrainCloudId(PlayerId);
     TArray<FOnlineAchievement> * PlayerAch = PlayerAchievements.Find(BrainCloudId);
+#endif
+
     if (NULL == PlayerAch)
     {
         // achievements haven't been read for a player
