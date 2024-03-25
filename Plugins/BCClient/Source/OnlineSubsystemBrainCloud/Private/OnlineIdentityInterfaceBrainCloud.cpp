@@ -10,8 +10,9 @@
 #include "ServiceName.h"
 
 #include "AssignableServerCallback.h"
+#include "Misc/CommandLine.h"
 
-FOnlineIdentityBrainCloud::FOnlineIdentityBrainCloud(class FOnlineSubsystemBrainCloud* InSubsystem) 
+FOnlineIdentityBrainCloud::FOnlineIdentityBrainCloud(class FOnlineSubsystemBrainCloud* InSubsystem)
     : Subsystem(InSubsystem)
 {
 }
@@ -64,9 +65,17 @@ bool FOnlineIdentityBrainCloud::Login(int32 LocalUserNum, const FOnlineAccountCr
 
     if (!ErrorStr.IsEmpty())
     {
+        // disable warnings about FUniqueNetId constructors deprecations
+        PRAGMA_DISABLE_DEPRECATION_WARNINGS
         UE_LOG_ONLINE(Warning, TEXT("Login request failed: %s"), *ErrorStr);
+        // Unreal Engine Version is >= Unreal Engine 5.0
+#if ENGINE_MAJOR_VERSION >= 5
+        TriggerOnLoginCompleteDelegates(LocalUserNum, false, FUniqueNetIdString::EmptyId().Get(), ErrorStr);
+#else
         TriggerOnLoginCompleteDelegates(LocalUserNum, false, FUniqueNetIdString(), ErrorStr);
+#endif
         return false;
+        PRAGMA_ENABLE_DEPRECATION_WARNINGS
     }
     return true;
 }
@@ -137,7 +146,12 @@ TArray<TSharedPtr<FUserOnlineAccount> > FOnlineIdentityBrainCloud::GetAllUserAcc
 
 TSharedPtr<const FUniqueNetId> FOnlineIdentityBrainCloud::GetUniquePlayerId(int32 LocalUserNum) const
 {
+    // Unreal Engine Version is >= Unreal Engine 5.0
+#if ENGINE_MAJOR_VERSION >= 5
+    return FUniqueNetIdString::Create(Subsystem->GetClient()->getAuthenticationService()->getProfileId(), NAME_Unset);
+#else
     return MakeShareable(new FUniqueNetIdString(Subsystem->GetClient()->getAuthenticationService()->getProfileId()));
+#endif
 }
 
 TSharedPtr<const FUniqueNetId> FOnlineIdentityBrainCloud::CreateUniquePlayerId(uint8* Bytes, int32 Size)
@@ -148,7 +162,12 @@ TSharedPtr<const FUniqueNetId> FOnlineIdentityBrainCloud::CreateUniquePlayerId(u
         if (StrLen > 0)
         {
             FString StrId((TCHAR*)Bytes);
+            // Unreal Engine Version is >= Unreal Engine 5.0
+#if ENGINE_MAJOR_VERSION >= 5
+            return FUniqueNetIdString::Create(StrId, NAME_Unset);
+#else
             return MakeShareable(new FUniqueNetIdString(StrId));
+#endif
         }
     }
     return NULL;
@@ -156,7 +175,12 @@ TSharedPtr<const FUniqueNetId> FOnlineIdentityBrainCloud::CreateUniquePlayerId(u
 
 TSharedPtr<const FUniqueNetId> FOnlineIdentityBrainCloud::CreateUniquePlayerId(const FString& Str)
 {
+    // Unreal Engine Version is >= Unreal Engine 5.0
+#if ENGINE_MAJOR_VERSION >= 5
+    return FUniqueNetIdString::Create(Str, NAME_Unset);
+#else
     return MakeShareable(new FUniqueNetIdString(Str));
+#endif
 }
 
 ELoginStatus::Type FOnlineIdentityBrainCloud::GetLoginStatus(int32 LocalUserNum) const
@@ -230,7 +254,12 @@ void FOnlineIdentityBrainCloud::authenticateSuccess(const FString& jsonData)
 void FOnlineIdentityBrainCloud::authenticateFail(int32 returnCode, const FString& jsonData)
 {
     bLoggingInUser = false;
+    // Unreal Engine Version is >= Unreal Engine 5.0
+#if  ENGINE_MAJOR_VERSION >= 5
+    TriggerOnLoginCompleteDelegates(0, false, FUniqueNetIdString::EmptyId().Get(), FString());
+#else
     TriggerOnLoginCompleteDelegates(0, false, FUniqueNetIdString(TEXT("")), FString());
+#endif
 }
 
 void FOnlineIdentityBrainCloud::logoutSuccess(const FString&)
