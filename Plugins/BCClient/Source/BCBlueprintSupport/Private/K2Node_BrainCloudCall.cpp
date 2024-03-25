@@ -19,7 +19,8 @@ UK2Node_BrainCloudCall::UK2Node_BrainCloudCall(const FObjectInitializer &ObjectI
 {
     ProxyActivateFunctionName = NAME_None;
 }
-
+// disable warnings about cast deprecations coming from TObjectIterator
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
 void UK2Node_BrainCloudCall::GetMenuActions(FBlueprintActionDatabaseRegistrar &ActionRegistrar) const
 {
     // these nested loops are combing over the same classes/functions the
@@ -89,7 +90,7 @@ void UK2Node_BrainCloudCall::GetMenuActions(FBlueprintActionDatabaseRegistrar &A
                         UObjectProperty *ReturnProp = CastChecked<UObjectProperty>(Func->GetReturnProperty());
 // Unreal Engine Version is >= 4.25 OR in Unreal Engine 5
 #elif (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 25) || ENGINE_MAJOR_VERSION == 5 
-                        FObjectProperty *ReturnProp = CastChecked<FObjectProperty>(Func->GetReturnProperty());
+                        FObjectProperty *ReturnProp = CastFieldChecked<FObjectProperty>(Func->GetReturnProperty());
 #endif
 
                         AsyncTaskNode->ProxyFactoryFunctionName = Func->GetFName();
@@ -108,5 +109,5 @@ void UK2Node_BrainCloudCall::GetMenuActions(FBlueprintActionDatabaseRegistrar &A
         }
     }
 }
-
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
 #undef LOCTEXT_NAMESPACE

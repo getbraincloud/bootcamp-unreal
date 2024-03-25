@@ -4,49 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Dom/JsonObject.h"
-#include "BrainCloudBlockchain.h"
-#include "UObject/NoExportTypes.h"
+
 #include "IServerCallback.h"
 
 class BrainCloudClient;
 #include "BrainCloudClient.h"
-#include "BrainCloudAuthentication.h"
-#include "BrainCloudLeaderboard.h"
-#include "BrainCloudPlayerState.h"
-#include "BrainCloudGamification.h"
-#include "BrainCloudGlobalEntity.h"
-#include "BrainCloudGlobalStatistics.h"
-#include "BrainCloudEntity.h"
-#include "BrainCloudPlayerStatistics.h"
-#include "BrainCloudTime.h"
-#include "BrainCloudPlayerStatisticsEvent.h"
-#include "BrainCloudIdentity.h"
-#include "BrainCloudItemCatalog.h"
-#include "BrainCloudUserItems.h"
-#include "BrainCloudEvent.h"
-#include "BrainCloudS3Handling.h"
-#include "BrainCloudScript.h"
-#include "BrainCloudAsyncMatch.h"
-#include "BrainCloudFriend.h"
-#include "BrainCloudGlobalApp.h"
-#include "BrainCloudMatchmaking.h"
-#include "BrainCloudOneWayMatch.h"
-#include "BrainCloudPlaybackStream.h"
-#include "BrainCloudPushNotification.h"
-#include "BrainCloudRedemptionCode.h"
-#include "BrainCloudDataStream.h"
-#include "BrainCloudProfanity.h"
-#include "BrainCloudFile.h"
-#include "BrainCloudGroup.h"
-#include "BrainCloudMail.h"
-#include "BrainCloudTournament.h"
-#include "BrainCloudGlobalFile.h"
-#include "BrainCloudCustomEntity.h"
-#include "BrainCloudPresence.h"
-#include "BrainCloudVirtualCurrency.h"
-#include "BrainCloudAppStore.h"
-#include "BrainCloudRelay.h"
-#include "BrainCloudTimeUtils.h"
+
 #include "BrainCloudWrapper.generated.h"
 
 class ServiceName;
@@ -341,6 +304,19 @@ class BCCLIENTPLUGIN_API UBrainCloudWrapper : public UObject, public IServerCall
   */
  void authenticateUltra(const FString& in_ultraUsername, const FString& in_ultraIdToken, bool in_forceCreate, IServerCallback * in_callback = NULL);
  
+ /**
+  * Authenticate the user using their Nintendo account id and an auth token
+  *
+  * Service Name - Authenticate
+  * Service Operation - Authenticate
+  *
+  * @param in_accountId The user's Nintendo account id
+  * @param in_authToken The user's Nintendo auth token
+  * @param in_forceCreate Should a new profile be created for this user if the account does not exist?
+  * @param in_callback The method to be invoked when the server response is received
+  */
+ void authenticateNintendo(const FString &in_accountId,const FString &in_authToken, bool in_forceCreate, IServerCallback * in_callback = NULL);
+
   /*
     * Authenticate the user using a handoffId and a token 
     *
@@ -637,7 +613,24 @@ class BCCLIENTPLUGIN_API UBrainCloudWrapper : public UObject, public IServerCall
        * @param in_forceCreate Should a new profile be created for this user if the account does not exist?
        * @param in_callback The method to be invoked when the server response is received
        */
-     void smartSwitchAuthenticateUltra(const FString &in_ultraUsername,const FString &in_ultraIdToken, bool in_forceCreate, IServerCallback * in_callback = NULL);
+    void smartSwitchAuthenticateUltra(const FString &in_ultraUsername,const FString &in_ultraIdToken, bool in_forceCreate, IServerCallback * in_callback = NULL);
+
+      /**
+       * Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+       * In event the current session was previously an anonymous account, the smart switch will delete that profile.
+       * Use this function to keep a clean design flow from anonymous to signed profiles
+       *
+       * Authenticate the user for Nintendo.
+       *
+       * Service Name - Authenticate
+       * Service Operation - Authenticate
+       *
+       * @param in_accountId  The user's Nintendo account id
+       * @param in_authToken The user's Nintendo auth token
+       * @param in_forceCreate Should a new profile be created for this user if the account does not exist?
+       * @param in_callback The method to be invoked when the server response is received
+       */
+    void smartSwitchAuthenticateNintendo(const FString &in_accountId,const FString &in_authToken, bool in_forceCreate, IServerCallback * in_callback = NULL);
  
     /**
     * Reset Email password - Sends a password reset email to the specified address
@@ -821,6 +814,7 @@ class BCCLIENTPLUGIN_API UBrainCloudWrapper : public UObject, public IServerCall
 	*/
     void reconnect(IServerCallback *callback = nullptr);
 
+    void logout(bool forgetUser, IServerCallback* in_callback);
     /**
      * Run callbacks, to be called once per frame from your main thread
      */
