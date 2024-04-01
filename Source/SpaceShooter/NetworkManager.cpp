@@ -11,14 +11,16 @@ UNetworkManager::UNetworkManager() :
 {
     m_BrainCloud = CreateDefaultSubobject<UBrainCloudWrapper>("BrainCloudWrapper");
     m_BrainCloud->initialize(kBrainCloudServer, kBrainCloudAppSecret, kBrainCloudAppID, kBrainCloudAppVersion);
-    
+
     FString version = m_BrainCloud->getClient()->getBrainCloudClientVersion();
-    UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::UNetworkManager() BrainCloud client version %s"), *version);
+    FString profileId = m_BrainCloud->getStoredProfileId();
+    FString anonymousId = m_BrainCloud->getStoredAnonymousId();
+    UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::UNetworkManager() BrainCloud client version %s (%s) (%s)"), *version, *profileId, *anonymousId);
     
     // Setup the callback functions
     m_AuthenticationCallback.successCallback.BindUObject(this, &UNetworkManager::OnAuthenticationCallback);
     m_AuthenticationCallback.failureCallback.BindUObject(this, &UNetworkManager::OnAuthenticationError);
-    
+
     m_LogOutCallback.successCallback.BindUObject(this, &UNetworkManager::OnLogOutCallback);
     m_LogOutCallback.failureCallback.BindUObject(this, &UNetworkManager::OnLogOutError);
 }
@@ -43,16 +45,22 @@ bool UNetworkManager::IsAuthenticated()
     return m_BrainCloud->getClient()->isAuthenticated();
 }
 
+void UNetworkManager::EndSession()
+{
+    m_BrainCloud->logout(false, nullptr);
+    m_BrainCloud->runCallbacks();
+}
+
 void UNetworkManager::LogOut()
 {
     if (IsAuthenticated())
     {
-        m_BrainCloud->getPlayerStateService()->logout(&m_LogOutCallback);
+        m_BrainCloud->logout(true, &m_LogOutCallback);
     }
     else
     {
         UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::RequestLogOut() Failed: user is not authenticated."));
-        
+
         if (m_Callback != nullptr)
             m_Callback->OnLogOutRequestFailed();
     }
@@ -89,11 +97,7 @@ void UNetworkManager::OnAuthenticationError(int statusCode, int reasonCode, cons
 void UNetworkManager::OnLogOutCallback(const FString& jsonData)
 {
     UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::OnLogOutCallback(%s)"), *jsonData);
-    
-    // The user logged out, clear the persisted data related to their account
-    m_BrainCloud->resetStoredAnonymousId();
-    m_BrainCloud->resetStoredProfileId();
-    
+
     if (m_Callback != nullptr)
         m_Callback->OnLogOutRequestCompleted();
 }
@@ -101,7 +105,7 @@ void UNetworkManager::OnLogOutCallback(const FString& jsonData)
 void UNetworkManager::OnLogOutError(int statusCode, int reasonCode, const FString& jsonError)
 {
     UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::OnLogOutError(%s)"), *jsonError);
-    
+
     if (m_Callback != nullptr)
         m_Callback->OnLogOutRequestFailed();
 }

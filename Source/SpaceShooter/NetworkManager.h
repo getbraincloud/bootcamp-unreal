@@ -11,24 +11,25 @@
 
 
 /**
- * 
+ *
  */
 UCLASS()
 class SPACESHOOTER_API UNetworkManager : public UObject
 {
-	GENERATED_BODY()
-    
+    GENERATED_BODY()
+
 public:
     UNetworkManager();
     ~UNetworkManager() = default;
-    
+
     void Tick(float DeltaTime);
-    
+
     void SetCallback(NetworkCallback* callback);
-    
+
     bool HasAuthenticatedPreviously();
     bool IsAuthenticated();
 
+    void EndSession();
     void LogOut();
     void Reconnect();
     
@@ -37,7 +38,7 @@ public:
 private:
     UFUNCTION(Category = "CallBack") void OnAuthenticationCallback(const FString& jsonData);
     UFUNCTION(Category = "CallBack") void OnAuthenticationError(int statusCode, int reasonCode, const FString& jsonError);
-    
+
     UFUNCTION(Category = "CallBack") void OnLogOutCallback(const FString& jsonData);
     UFUNCTION(Category = "CallBack") void OnLogOutError(int statusCode, int reasonCode, const FString& jsonError);
     
