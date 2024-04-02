@@ -30,6 +30,7 @@ public:
     bool IsAuthenticated();
     bool IsUsernameSaved();
 
+    void EndSession();
     void LogOut();
     void Reconnect();
     
