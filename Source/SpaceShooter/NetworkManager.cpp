@@ -46,15 +46,21 @@ bool UNetworkManager::IsAuthenticated()
     return m_BrainCloud->getClient()->isAuthenticated();
 }
 
+void UNetworkManager::EndSession()
+{
+    m_BrainCloud->logout(false, nullptr);
+    m_BrainCloud->runCallbacks();
+}
+
 void UNetworkManager::LogOut()
 {
     if (IsAuthenticated())
     {
-        m_BrainCloud->getPlayerStateService()->logout(&m_LogOutCallback);
+        m_BrainCloud->logout(true, &m_LogOutCallback);
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::RequestLogOut() Failed: user is not authenticated."));
+        UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::LogOut() Failed: user is not authenticated."));
         
         if (m_Callback != nullptr)
             m_Callback->OnLogOutRequestFailed();
@@ -122,10 +128,6 @@ void UNetworkManager::OnAuthenticationError(int statusCode, int reasonCode, cons
 void UNetworkManager::OnLogOutCallback(const FString& jsonData)
 {
     UE_LOG(LogTemp, Warning, TEXT("UNetworkManager::OnLogOutCallback(%s)"), *jsonData);
-        
-    // The user logged out, clear the persisted data related to their account
-    m_BrainCloud->resetStoredAnonymousId();
-    m_BrainCloud->resetStoredProfileId();
     
     if (m_Callback != nullptr)
         m_Callback->OnLogOutRequestCompleted();
