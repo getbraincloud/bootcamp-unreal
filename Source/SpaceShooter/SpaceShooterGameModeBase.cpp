@@ -57,6 +57,15 @@ void ASpaceShooterGameModeBase::BeginPlay()
     HandleAuthentication();
 }
 
+void ASpaceShooterGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    if (EndPlayReason == EEndPlayReason::Type::Quit || EndPlayReason == EEndPlayReason::Type::EndPlayInEditor)
+    {
+        if (GetNetworkManager()->IsAuthenticated())
+            GetNetworkManager()->EndSession();
+    }
+}
+
 void ASpaceShooterGameModeBase::Tick(float DeltaTime)
 {
     if(m_NetworkManager != nullptr)
