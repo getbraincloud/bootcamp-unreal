@@ -21,6 +21,9 @@ protected:
 public:
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
     
+    void SetAppVersion(const FString& version);
+    void SetBrainCloudVersion(const FString& version);
+
     void SetElapsedTime(float elapsedTime);
     void SetHealth(float pct);
     void SetShield(float pct);
@@ -49,6 +52,8 @@ private:
     
     void OnFadeOutHasCompleted(Fader* fader) override;
 
+    UPROPERTY(meta = (BindWidget)) class UTextBlock* AppVersion;
+    UPROPERTY(meta = (BindWidget)) class UTextBlock* BrainCloudVersion;
     UPROPERTY(meta = (BindWidget)) class UTextBlock* ElapsedTime;
     UPROPERTY(meta = (BindWidget)) class UTextBlock* MainInformation;
     UPROPERTY(meta = (BindWidget)) class UTextBlock* SecondaryInformation;

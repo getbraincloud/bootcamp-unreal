@@ -9,6 +9,7 @@
 #include "SpaceShooterGameModeBase.h"
 #include "Ship.h"
 #include "Shield.h"
+#include "GetVersionProjectLibrary.h"
 
 
 ASpaceShooterHUD::ASpaceShooterHUD() :
@@ -40,6 +41,13 @@ void ASpaceShooterHUD::BeginPlay()
         m_LeavingInfoScroller = m_HUDWidget->GetHUDInfoScrollerWidget1();
         m_LeavingInfoScroller->SetCallback(this);
         m_LeavingInfoScroller->Clear();
+
+        FString version = UGetVersionProjectLibrary::GetAppVersion();
+        m_HUDWidget->SetAppVersion(version);
+
+        ASpaceShooterGameModeBase* gameMode = Cast<ASpaceShooterGameModeBase>(GetWorld()->GetAuthGameMode());
+        if (gameMode != nullptr)
+            m_HUDWidget->SetBrainCloudVersion(gameMode->GetNetworkManager()->GetBrainCloudClientVersion());
     }
 }
 
