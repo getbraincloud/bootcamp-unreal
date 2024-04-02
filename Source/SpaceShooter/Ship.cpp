@@ -599,5 +599,8 @@ void AShip::OnMovementRightStop()
 void AShip::OnSlideHasCompleted(class VSlider* slider)
 {
     m_IsSpawning = false;
+    
+    m_Acceleration = FVector2D::ZeroVector;
+    m_LinearVelocity = FVector2D::ZeroVector;
 }
 
