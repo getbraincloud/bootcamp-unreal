@@ -29,6 +29,7 @@ public:
     bool HasAuthenticatedPreviously();
     bool IsAuthenticated();
 
+    void EndSession();
     void LogOut();
     void Reconnect();
     
