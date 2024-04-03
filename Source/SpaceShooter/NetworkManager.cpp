@@ -20,6 +20,11 @@ void UNetworkManager::SetCallback(NetworkCallback* callback)
     m_Callback = callback;
 }
 
+FString UNetworkManager::GetBrainCloudClientVersion()
+{
+    return "";
+}
+
 bool UNetworkManager::IsAuthenticated()
 {
     return false;
