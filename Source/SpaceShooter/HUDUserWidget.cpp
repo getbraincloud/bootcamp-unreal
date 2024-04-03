@@ -49,6 +49,18 @@ void UHUDUserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     }
 }
 
+void UHUDUserWidget::SetAppVersion(const FString& version)
+{
+    FString formattedText = "App version: " + version;
+    AppVersion->SetText(FText::FromString(formattedText));
+}
+
+void UHUDUserWidget::SetBrainCloudVersion(const FString& version)
+{
+    FString formattedText = "BC client version: " + version;
+    BrainCloudVersion->SetText(FText::FromString(formattedText));
+}
+
 void UHUDUserWidget::SetElapsedTime(float elapsedTime)
 {
     FString formattedText = "Time: " + StringUtils::FormatTime(elapsedTime);
