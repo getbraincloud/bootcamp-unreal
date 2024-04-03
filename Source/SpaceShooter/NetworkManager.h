@@ -27,6 +27,8 @@ public:
     
     void SetCallback(NetworkCallback* callback);
     
+    FString GetBrainCloudClientVersion();
+    
     bool HasAuthenticatedPreviously();
     bool IsAuthenticated();
     bool IsUsernameSaved();
