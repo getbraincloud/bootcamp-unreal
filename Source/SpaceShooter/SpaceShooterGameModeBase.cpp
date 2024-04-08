@@ -78,7 +78,7 @@ void ASpaceShooterGameModeBase::Tick(float DeltaTime)
     if(m_Spawner != nullptr)
         m_Spawner->Tick(DeltaTime);
     
-    if (m_GameState == GameModeState::GameOver)
+    if (m_GameState == GameModeState::GameOver || m_GameState == GameModeState::Victory)
     {
         if (m_EndOfGameDisplayTime > 0.0f)
         {
@@ -92,10 +92,17 @@ void ASpaceShooterGameModeBase::Tick(float DeltaTime)
 
                 if (m_Mode == Mode::Endless)
                 {
-                    if (GetNetworkManager()->IsUsernameSaved())
-                        GetNetworkManager()->PostScoreToLeaderboard(kBrainCloudMainLeaderboardID, m_ElapsedTime);
+                    if(GetNetworkManager()->IsAuthenticated())
+                    {
+                        if (GetNetworkManager()->IsUsernameSaved())
+                            GetNetworkManager()->PostScoreToLeaderboard(kBrainCloudMainLeaderboardID, m_ElapsedTime);
+                        else
+                            GetDialogManager()->ShowPostScoreDialog(m_ElapsedTime);
+                    }
                     else
-                        GetDialogManager()->ShowPostScoreDialog(m_ElapsedTime);
+                    {
+                        GetDialogManager()->ShowPlayAgainDialog();
+                    }
                 }
                 else if (m_Mode == Mode::Horde)
                 {
