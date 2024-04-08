@@ -60,7 +60,7 @@ void ASpaceShooterGameModeBase::Tick(float DeltaTime)
     if(m_Spawner != nullptr)
         m_Spawner->Tick(DeltaTime);
     
-    if (m_GameState == GameModeState::GameOver)
+    if (m_GameState == GameModeState::GameOver || m_GameState == GameModeState::Victory)
     {
         if (m_EndOfGameDisplayTime > 0.0f)
         {
