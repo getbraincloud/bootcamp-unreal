@@ -37,21 +37,21 @@ AShip::AShip() :
     m_UpKeyPressed(false),
     m_DownKeyPressed(false)
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+    // Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+    PrimaryActorTick.bCanEverTick = true;
 
     m_Root = CreateDefaultSubobject<USceneComponent>("Root");
     SetRootComponent(m_Root);
-    
+
     m_Sprite = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("Sprite"));
     m_Sprite->SetSimulatePhysics(false);
-    
-    m_Sprite->GetBodyInstance()->SetCollisionEnabled( ECollisionEnabled::QueryOnly );
-    m_Sprite->GetBodyInstance()->SetObjectType( ECollisionChannel::ECC_Pawn );
-    m_Sprite->GetBodyInstance()->SetResponseToChannel( ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Overlap );
-    
+
+    m_Sprite->GetBodyInstance()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    m_Sprite->GetBodyInstance()->SetObjectType(ECollisionChannel::ECC_Pawn);
+    m_Sprite->GetBodyInstance()->SetResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Overlap);
+
     m_Sprite->SetupAttachment(m_Root);
-    
+
     static ConstructorHelpers::FObjectFinder<UPaperSprite> spriteAsset(TEXT("/Game/Sprites/Ship_Sprite"));
     if (spriteAsset.Succeeded())
         m_Sprite->SetSprite(spriteAsset.Object);
@@ -60,51 +60,52 @@ AShip::AShip() :
 // Called when the game starts or when spawned
 void AShip::BeginPlay()
 {
-	Super::BeginPlay();
-    
+    Super::BeginPlay();
+
     SetHealth(kShipInitialHealth);
     SetDepth(kEnemyLayer);
-    
+
     UPaperSprite* sprite = m_Sprite->GetSprite();
-    if(sprite != nullptr)
+    if (sprite != nullptr)
         m_SpriteSize = FVector2D(sprite->GetBakedTexture()->GetSizeX(), sprite->GetBakedTexture()->GetSizeY());
-    
+
     // Create and Attach the Shield to the Ship
     m_Shield = GetWorld()->SpawnActor<AShield>(AShield::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
     m_Shield->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("Shield"));
-    
+    m_Shield->Deactivate();
+
     Deactivate();
 }
 
 // Called every frame
 void AShip::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
 
     float timeScale = GetGameMode()->GetTimeScale();
     if (timeScale == 0.0f)
         return;
-    
+
     if (m_IsSpawning)
     {
-       if (m_SpawnSlider.IsSliding())
-       {
-           m_SpawnSlider.Tick(DeltaTime * timeScale);
-           SetPosition(m_SpawnSlider.GetCurrent());
-       }
-       return;
+        if (m_SpawnSlider.IsSliding())
+        {
+            m_SpawnSlider.Tick(DeltaTime * timeScale);
+            SetPosition(m_SpawnSlider.GetCurrent());
+        }
+        return;
     }
 
     if (m_InvincibilityTimer > 0.0f)
     {
-       m_InvincibilityTimer -= DeltaTime * timeScale;
-       if (m_InvincibilityTimer <= 0.0f)
-       {
-           m_InvincibilityTimer = 0.0f;
-           SetAlpha(1.0f);
-       }
-       else
-           SetAlpha(kShipInvincibleAlpha);
+        m_InvincibilityTimer -= DeltaTime * timeScale;
+        if (m_InvincibilityTimer <= 0.0f)
+        {
+            m_InvincibilityTimer = 0.0f;
+            SetAlpha(1.0f);
+        }
+        else
+            SetAlpha(kShipInvincibleAlpha);
     }
 
     FVector2D drag;
@@ -137,27 +138,27 @@ void AShip::Tick(float DeltaTime)
 // Called to bind functionality to input
 void AShip::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+    Super::SetupPlayerInputComponent(PlayerInputComponent);
 
     PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AShip::OnFire);
-    
+
     PlayerInputComponent->BindAction("Up", IE_Pressed, this, &AShip::OnMovementUpStart);
     PlayerInputComponent->BindAction("Up", IE_Released, this, &AShip::OnMovementUpStop);
-    
+
     PlayerInputComponent->BindAction("Down", IE_Pressed, this, &AShip::OnMovementDownStart);
     PlayerInputComponent->BindAction("Down", IE_Released, this, &AShip::OnMovementDownStop);
 
     PlayerInputComponent->BindAction("Left", IE_Pressed, this, &AShip::OnMovementLeftStart);
     PlayerInputComponent->BindAction("Left", IE_Released, this, &AShip::OnMovementLeftStop);
-    
+
     PlayerInputComponent->BindAction("Right", IE_Pressed, this, &AShip::OnMovementRightStart);
     PlayerInputComponent->BindAction("Right", IE_Released, this, &AShip::OnMovementRightStop);
-    
+
     PlayerInputComponent->BindAction("Cheat_AddTime", IE_Pressed, GetGameMode(), &ASpaceShooterGameModeBase::OnCheatAddTime);
     PlayerInputComponent->BindAction("Cheat_HealUp", IE_Pressed, GetGameMode(), &ASpaceShooterGameModeBase::OnCheatHealUp);
     PlayerInputComponent->BindAction("Cheat_NextLevel", IE_Pressed, GetGameMode(), &ASpaceShooterGameModeBase::OnCheatNextLevel);
 
-    if(GetGameMode()->GetDialogManager() != nullptr)
+    if (GetGameMode()->GetDialogManager() != nullptr)
         PlayerInputComponent->BindAction("Escape", IE_Pressed, GetGameMode()->GetDialogManager(), &UDialogManager::OnEscape);
 }
 
@@ -165,19 +166,19 @@ void AShip::NotifyActorBeginOverlap(AActor* otherActor)
 {
     Super::NotifyActorBeginOverlap(otherActor);
 
-    if(GetHealth() > 0)
+    if (GetHealth() > 0)
     {
         if (otherActor->GetName().Contains("Asteroid"))
         {
             AAsteroid* asteroid = Cast<AAsteroid>(otherActor);
-            if(asteroid->IsActive())
+            if (asteroid->IsActive())
             {
                 int asteroidAttackDamage = asteroid->GetAttackDamage();
 
                 Statistic* asteroidDestroyedStat = GetGameMode()->GetStatisticsManager()->GetStatisticByName(kBrainCloudStatAsteroidDestroyed);
                 if (asteroidDestroyedStat != nullptr)
-                asteroidDestroyedStat->ApplyIncrement();
-                
+                    asteroidDestroyedStat->ApplyIncrement();
+
                 asteroid->Explode(true);
 
                 if (ApplyDamage(asteroidAttackDamage))
@@ -187,14 +188,14 @@ void AShip::NotifyActorBeginOverlap(AActor* otherActor)
         else if (otherActor->GetName().Contains("Enemy"))
         {
             AEnemy* enemy = Cast<AEnemy>(otherActor);
-            if(enemy->IsActive())
+            if (enemy->IsActive())
             {
                 int enemyAttackDamage = enemy->GetAttackDamage();
 
                 Statistic* enemiesKilledStat = GetGameMode()->GetStatisticsManager()->GetStatisticByName(kBrainCloudStatEnemiesKilled);
                 if (enemiesKilledStat != nullptr)
-                enemiesKilledStat->ApplyIncrement();
-                
+                    enemiesKilledStat->ApplyIncrement();
+
                 enemy->Explode();
 
                 if (ApplyDamage(enemyAttackDamage))
@@ -204,7 +205,7 @@ void AShip::NotifyActorBeginOverlap(AActor* otherActor)
         else if (otherActor->GetName().Contains("Boss"))
         {
             ABoss* boss = Cast<ABoss>(otherActor);
-            if(boss->IsActive())
+            if (boss->IsActive())
             {
                 if (ApplyDamage(boss->GetAttackDamage()))
                     Explode();
@@ -213,7 +214,7 @@ void AShip::NotifyActorBeginOverlap(AActor* otherActor)
         else if (otherActor->GetName().Contains("Laser") && !otherActor->GetName().Contains("LaserImpact"))
         {
             ALaser* laser = Cast<ALaser>(otherActor);
-            if(laser->IsActive())
+            if (laser->IsActive())
             {
                 if (laser->GetLaserColor() == ALaser::Color::Red)
                 {
@@ -229,9 +230,9 @@ void AShip::NotifyActorBeginOverlap(AActor* otherActor)
         else if (otherActor->GetName().Contains("Missile"))
         {
             AMissile* missile = Cast<AMissile>(otherActor);
-            if(missile->IsActive())
+            if (missile->IsActive())
             {
-                if(missile->GetMissleSize() == AMissile::Size::Small)
+                if (missile->GetMissleSize() == AMissile::Size::Small)
                     GetSpawner()->SpawnExplosion(missile->GetMiddle(), FVector2D(0.2f, 0.2f));
                 else
                     GetSpawner()->SpawnExplosion(missile->GetMiddle(), FVector2D(0.45f, 0.45f));
@@ -245,7 +246,7 @@ void AShip::NotifyActorBeginOverlap(AActor* otherActor)
         else if (otherActor->GetName().Contains("Pickup"))
         {
             APickup* pickup = Cast<APickup>(otherActor);
-            if(pickup->IsActive())
+            if (pickup->IsActive())
             {
                 HandlePickup(pickup);
                 pickup->Deactivate();
@@ -268,7 +269,7 @@ FVector2D AShip::GetPosition() const
 void AShip::SetDepth(float depth)
 {
     m_Depth = depth;
-    
+
     // Update RootComponent's position
     FVector position = RootComponent->GetRelativeLocation();
     RootComponent->SetRelativeLocation(FVector(position.X, m_Depth, position.Z));
@@ -295,7 +296,7 @@ FVector2D AShip::Translate(FVector2D displacement)
     FVector2D position = GetPosition();
     position += displacement;
     SetPosition(position);
-    
+
     return position;
 }
 
@@ -303,41 +304,41 @@ bool AShip::ApplyDamage(int damage)
 {
     if (IsInvincible())
         return false;
-    
-   // Set the player's invincibility timer, since they took damage
-   m_InvincibilityTimer = kShipInvincibilityDuration;
 
-   // If the player still has the shield, then take damage from it first
-   if (HasShield())
-   {
-       if (m_Shield->GetHealth() < damage)
-       {
-           int diff = damage - m_Shield->GetHealth();
-           m_Shield->ApplyDamage(m_Shield->GetHealth());
-           m_Shield->Deactivate();
-           
-           damage = diff;
-       }
-       else
-       {
-           if (m_Shield->ApplyDamage(damage))
-               m_Shield->Deactivate();
-           
-           if(m_Callback != nullptr)
-               m_Callback->OnShipHasTakenDamage(this, damage, m_Health, m_Shield->GetHealth());
-           
-           return false;
-       }
-   }
-    
+    // Set the player's invincibility timer, since they took damage
+    m_InvincibilityTimer = kShipInvincibilityDuration;
+
+    // If the player still has the shield, then take damage from it first
+    if (HasShield())
+    {
+        if (m_Shield->GetHealth() < damage)
+        {
+            int diff = damage - m_Shield->GetHealth();
+            m_Shield->ApplyDamage(m_Shield->GetHealth());
+            m_Shield->Deactivate();
+
+            damage = diff;
+        }
+        else
+        {
+            if (m_Shield->ApplyDamage(damage))
+                m_Shield->Deactivate();
+
+            if (m_Callback != nullptr)
+                m_Callback->OnShipHasTakenDamage(this, damage, m_Health, m_Shield->GetHealth());
+
+            return false;
+        }
+    }
+
     m_Health -= damage;
-    
-    if(m_Health <= 0)
+
+    if (m_Health <= 0)
         m_Health = 0;
-    
-    if(m_Callback != nullptr)
+
+    if (m_Callback != nullptr)
         m_Callback->OnShipHasTakenDamage(this, damage, m_Health, m_Shield != nullptr ? m_Shield->GetHealth() : 0);
-      
+
     return m_Health == 0;
 }
 
@@ -364,7 +365,7 @@ int AShip::GetAttackDamage() const
 void AShip::Activate()
 {
     m_IsActive = true;
-    
+
     SetActorHiddenInGame(!m_IsActive);
     SetActorEnableCollision(m_IsActive);
     SetActorTickEnabled(m_IsActive);
@@ -373,7 +374,7 @@ void AShip::Activate()
 void AShip::Deactivate()
 {
     m_IsActive = false;
-    
+
     SetActorHiddenInGame(!m_IsActive);
     SetActorEnableCollision(m_IsActive);
     SetActorTickEnabled(m_IsActive);
@@ -405,7 +406,7 @@ float AShip::GetAlpha() const
 void AShip::Spawn()
 {
     m_IsSpawning = true;
-    
+
     HealUp();
 
     FVector2D start(kShipOffScreenSpawnX, (kScreenHeight - kHudHeight) * 0.5f);
@@ -463,7 +464,7 @@ USpawner* AShip::GetSpawner()
 {
     USpawner* spawner = GetGameMode()->GetSpawner();
     check(spawner != nullptr);
-    
+
     return spawner;
 }
 
@@ -471,7 +472,7 @@ ASpaceShooterGameModeBase* AShip::GetGameMode()
 {
     ASpaceShooterGameModeBase* gameMode = Cast<ASpaceShooterGameModeBase>(GetWorld()->GetAuthGameMode());
     check(gameMode != nullptr);
-    
+
     return gameMode;
 }
 
@@ -504,7 +505,7 @@ void AShip::Explode()
             rightWing->FadeOut(kShipWingExplosionFadeOutTime);
 
         Deactivate();
-        
+
         if (m_Callback != nullptr)
             m_Callback->OnShipHasExploded(this);
     }
@@ -519,8 +520,8 @@ void AShip::HandlePickup(APickup* pickup)
 
         if (m_Shield->GetHealth() < kShipInitialShieldHealth)
             m_Shield->SetHealth(m_Shield->GetHealth() + 1);
-        
-        if(m_Callback != nullptr)
+
+        if (m_Callback != nullptr)
             m_Callback->OnShipHasPickedUpShield(this, m_Shield->GetHealth());
     }
 }
@@ -536,7 +537,7 @@ void AShip::OnFire()
 
 void AShip::OnMovementUpStart()
 {
-    if (!m_IsSpawning && GetHealth() > 0)
+    if (!m_IsSpawning && GetHealth() > 0 && IsActive())
     {
         m_UpKeyPressed = true;
         m_Acceleration.Y += kShipAcceleration;
@@ -546,7 +547,7 @@ void AShip::OnMovementUpStart()
 
 void AShip::OnMovementDownStart()
 {
-    if (!m_IsSpawning && GetHealth() > 0)
+    if (!m_IsSpawning && GetHealth() > 0 && IsActive())
     {
         m_DownKeyPressed = true;
         m_Acceleration.Y -= kShipAcceleration;
@@ -556,7 +557,7 @@ void AShip::OnMovementDownStart()
 
 void AShip::OnMovementLeftStart()
 {
-    if (!m_IsSpawning && GetHealth() > 0)
+    if (!m_IsSpawning && GetHealth() > 0 && IsActive())
     {
         m_LeftKeyPressed = true;
         m_Acceleration.X -= kShipAcceleration;
@@ -566,7 +567,7 @@ void AShip::OnMovementLeftStart()
 
 void AShip::OnMovementRightStart()
 {
-    if (!m_IsSpawning && GetHealth() > 0)
+    if (!m_IsSpawning && GetHealth() > 0 && IsActive())
     {
         m_RightKeyPressed = true;
         m_Acceleration.X += kShipAcceleration;
@@ -576,7 +577,7 @@ void AShip::OnMovementRightStart()
 
 void AShip::OnMovementUpStop()
 {
-    if (!m_IsSpawning && m_UpKeyPressed && GetHealth() > 0)
+    if (!m_IsSpawning && m_UpKeyPressed)
     {
         m_UpKeyPressed = false;
         m_Acceleration.Y -= kShipAcceleration;
@@ -585,7 +586,7 @@ void AShip::OnMovementUpStop()
 
 void AShip::OnMovementDownStop()
 {
-    if (!m_IsSpawning && m_DownKeyPressed && GetHealth() > 0)
+    if (!m_IsSpawning && m_DownKeyPressed)
     {
         m_DownKeyPressed = false;
         m_Acceleration.Y += kShipAcceleration;
@@ -594,7 +595,7 @@ void AShip::OnMovementDownStop()
 
 void AShip::OnMovementLeftStop()
 {
-    if (!m_IsSpawning && m_LeftKeyPressed && GetHealth() > 0)
+    if (!m_IsSpawning && m_LeftKeyPressed)
     {
         m_LeftKeyPressed = false;
         m_Acceleration.X += kShipAcceleration;
@@ -603,7 +604,7 @@ void AShip::OnMovementLeftStop()
 
 void AShip::OnMovementRightStop()
 {
-    if (!m_IsSpawning && m_RightKeyPressed && GetHealth() > 0)
+    if (!m_IsSpawning && m_RightKeyPressed)
     {
         m_RightKeyPressed = false;
         m_Acceleration.X -= kShipAcceleration;
@@ -614,7 +615,7 @@ void AShip::OnSlideHasCompleted(class VSlider* slider)
 {
     m_IsSpawning = false;
 
-    m_Acceleration = FVector2D::ZeroVector;
     m_LinearVelocity = FVector2D::ZeroVector;
+    m_Acceleration = FVector2D::ZeroVector;
 }
 
