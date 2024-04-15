@@ -78,6 +78,8 @@ void AShip::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
     float timeScale = GetGameMode()->GetTimeScale();
+    if (timeScale == 0.0f)
+        return;
     
     if (m_IsSpawning)
     {
