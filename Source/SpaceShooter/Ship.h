@@ -115,4 +115,8 @@ private:
     VSlider m_SpawnSlider;
     bool m_IsSpawning;
     bool m_IsActive;
+    bool m_RightKeyPressed;
+    bool m_LeftKeyPressed;
+    bool m_UpKeyPressed;
+    bool m_DownKeyPressed;
 };
