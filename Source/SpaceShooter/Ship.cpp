@@ -31,7 +31,11 @@ AShip::AShip() :
     m_Health(0),
     m_AttackDamage(0),
     m_IsSpawning(false),
-    m_IsActive(true)
+    m_IsActive(true),
+    m_RightKeyPressed(false),
+    m_LeftKeyPressed(false),
+    m_UpKeyPressed(false),
+    m_DownKeyPressed(false)
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -534,6 +538,7 @@ void AShip::OnMovementUpStart()
 {
     if (!m_IsSpawning && GetHealth() > 0)
     {
+        m_UpKeyPressed = true;
         m_Acceleration.Y += kShipAcceleration;
         m_LinearVelocity.Y = m_Acceleration.Y;
     }
@@ -543,6 +548,7 @@ void AShip::OnMovementDownStart()
 {
     if (!m_IsSpawning && GetHealth() > 0)
     {
+        m_DownKeyPressed = true;
         m_Acceleration.Y -= kShipAcceleration;
         m_LinearVelocity.Y = m_Acceleration.Y;
     }
@@ -552,6 +558,7 @@ void AShip::OnMovementLeftStart()
 {
     if (!m_IsSpawning && GetHealth() > 0)
     {
+        m_LeftKeyPressed = true;
         m_Acceleration.X -= kShipAcceleration;
         m_LinearVelocity.X = m_Acceleration.X;
     }
@@ -561,6 +568,7 @@ void AShip::OnMovementRightStart()
 {
     if (!m_IsSpawning && GetHealth() > 0)
     {
+        m_RightKeyPressed = true;
         m_Acceleration.X += kShipAcceleration;
         m_LinearVelocity.X = m_Acceleration.X;
     }
@@ -568,32 +576,36 @@ void AShip::OnMovementRightStart()
 
 void AShip::OnMovementUpStop()
 {
-    if (!m_IsSpawning && GetHealth() > 0)
+    if (!m_IsSpawning && m_UpKeyPressed && GetHealth() > 0)
     {
+        m_UpKeyPressed = false;
         m_Acceleration.Y -= kShipAcceleration;
     }
 }
 
 void AShip::OnMovementDownStop()
 {
-    if (!m_IsSpawning && GetHealth() > 0)
+    if (!m_IsSpawning && m_DownKeyPressed && GetHealth() > 0)
     {
+        m_DownKeyPressed = false;
         m_Acceleration.Y += kShipAcceleration;
     }
 }
 
 void AShip::OnMovementLeftStop()
 {
-    if (!m_IsSpawning && GetHealth() > 0)
+    if (!m_IsSpawning && m_LeftKeyPressed && GetHealth() > 0)
     {
+        m_LeftKeyPressed = false;
         m_Acceleration.X += kShipAcceleration;
     }
 }
 
 void AShip::OnMovementRightStop()
 {
-    if (!m_IsSpawning && GetHealth() > 0)
+    if (!m_IsSpawning && m_RightKeyPressed && GetHealth() > 0)
     {
+        m_RightKeyPressed = false;
         m_Acceleration.X -= kShipAcceleration;
     }
 }
