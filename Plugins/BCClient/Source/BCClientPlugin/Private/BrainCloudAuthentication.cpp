@@ -270,6 +270,7 @@ void BrainCloudAuthentication::authenticate(
 	IServerCallback *callback)
 {
 	BrainCloudClient *brainCloudClientRef = _client;
+
 	TSharedRef<FJsonObject> message = MakeShareable(new FJsonObject());
 
 	message->SetStringField(OperationParam::AuthenticateServiceAuthenticateExternalId.getValue(), externalId);
@@ -284,7 +285,7 @@ void BrainCloudAuthentication::authenticate(
 	message->SetStringField(OperationParam::AuthenticateServiceAuthenticateReleasePlatform.getValue(), brainCloudClientRef->getReleasePlatform());
 	message->SetStringField(OperationParam::AuthenticateServiceAuthenticateGameVersion.getValue(), brainCloudClientRef->getAppVersion());
 	message->SetStringField(OperationParam::AuthenticateServiceAuthenticateBrainCloudVersion.getValue(), brainCloudClientRef->getBrainCloudClientVersion());
-	message->SetStringField(TEXT("clientLib"), TEXT("ue4"));
+	message->SetStringField(TEXT("clientLib"), TEXT("Unreal"));
 
 	if (OperationParam::isOptionalParamValid(externalAuthName))
 	{
@@ -295,8 +296,10 @@ void BrainCloudAuthentication::authenticate(
 	{
 		message->SetStringField(OperationParam::AuthenticateServiceAuthenticateExtraJson.getValue(), in_extraJson);
 	}
-    
-    message->SetStringField(OperationParam::AuthenticateServiceAuthenticateCountryCode.getValue(), brainCloudClientRef->getCountryCode());
+	
+	FString countryCode = brainCloudClientRef->getCountryCode();
+
+    message->SetStringField(OperationParam::AuthenticateServiceAuthenticateCountryCode.getValue(), countryCode);
     message->SetStringField(OperationParam::AuthenticateServiceAuthenticateLanguageCode.getValue(), brainCloudClientRef->getLanguageCode());
     message->SetNumberField(OperationParam::AuthenticateServiceAuthenticateTimeZoneOffset.getValue(), brainCloudClientRef->getTimezoneOffset());
                                                                       
