@@ -697,6 +697,8 @@ void UNetworkManager::OnGlobalEntityLevelDataCallback(const FString& jsonData)
             
             levelData.emplace_back(entityType, entityID, index, levelJson);
         }
+        
+        std::sort(levelData.begin(), levelData.end(), LevelData::Compare);
     }
     
     if (m_Callback != nullptr)
@@ -1187,6 +1189,8 @@ std::vector<LevelData> UNetworkManager::ParseLevelData(TSharedPtr<FJsonObject>& 
         
         levelData.emplace_back(entityType, entityID, index, levelJson);
     }
+    
+    std::sort(levelData.begin(), levelData.end(), LevelData::Compare);
     
     return levelData;
 }
