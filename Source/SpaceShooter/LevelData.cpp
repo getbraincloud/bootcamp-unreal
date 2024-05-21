@@ -191,3 +191,8 @@ std::vector<FString> LevelData::GetStartingEnemies()
 {
     return m_StartingEnemies;
 }
+
+bool LevelData::Compare(LevelData& a, LevelData& b)
+{
+    return a.GetIndex() < b.GetIndex();
+}
