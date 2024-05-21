@@ -53,6 +53,8 @@ public:
     std::vector<EnemyType> GetEnemyTypes();
     std::vector<FString> GetStartingAsteroids();
     std::vector<FString> GetStartingEnemies();
+    
+    static bool Compare(LevelData& a, LevelData& b);
         
 private:
     std::vector<EnemyType> m_EnemyTypes;
