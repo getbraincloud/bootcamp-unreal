@@ -354,6 +354,8 @@ void UNetworkManager::OnGlobalEntityLevelDataCallback(const FString& jsonData)
             
             levelData.emplace_back(entityType, entityID, index, levelJson);
         }
+        
+        std::sort(levelData.begin(), levelData.end(), LevelData::Compare);
     }
     
     if (m_Callback != nullptr)
